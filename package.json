@@ -1,0 +1,36 @@
+{
+  "name": "snpkg-snapi-common",
+  "version": "0.0.0",
+  "description": "Common code shared across SNAPI microservices",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run clean && rollup -c",
+    "watch": "rollup -cw"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/social-native/snpkg-snapi-common.git"
+  },
+  "keywords": [
+    "SNAPI",
+    "SNPKG"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/social-native/snpkg-snapi-common/issues"
+  },
+  "homepage": "https://github.com/social-native/snpkg-snapi-common#readme",
+  "devDependencies": {
+    "rollup": "^1.2.2",
+    "rollup-plugin-typescript2": "^0.19.2",
+    "typescript": "^3.3.3333"
+  }
+}
