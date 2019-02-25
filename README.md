@@ -4,7 +4,7 @@ This repo provides microservices with core features.
 
 TODO add features:
 
- - [ ] `Typescript` for typing and generating JS `snpkg-snapi-common type-check`
+ - [ ] `Typescript` for typing `snpkg-snapi-common type-check`
  - [ ] `TSLint` for linting `snpkg-snapi-common lint`
  - [ ] `Prettier` for making the code beautiful `snpkg-snapi-common prettier`
  - [ ] `Depcheck` for dependency checking `snpkg-snapi-common dep-check`
