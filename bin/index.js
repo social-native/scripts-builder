@@ -22,11 +22,14 @@ const rootDir = process.argv[1].replace('node_modules/.bin/snpkg-snapi-common', 
 // Script directory where scripts are located
 const scriptDir = process.argv[1].replace('.bin/', '').concat('/scripts/');
 
-// scripts that can be called located in ../scripts
-// ignoring directories
-const existingScripts = fs.readdirSync(scriptDir, { withFileTypes: true })
-  .filter(dirent => !dirent.isDirectory())
-  .map(dirent => dirent.name.split('.').slice(0, -1).join('.'))
+// read list of scripts that exist from ../scripts
+const existingScripts = fs.readdirSync(scriptDir).map(file => {
+  const parts = file.split('.');
+  if (parts.length > 1) {
+    return parts.slice(0, -1).join('.')
+  }
+  return parts.join('.')
+})
 
 
 const args = process.argv.slice(2);
@@ -35,8 +38,6 @@ const scriptIndex = args.findIndex(
 );
 const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
 
-// console.log('script args: ', scriptArgs)
-console.log(existingScripts)
 if (existingScripts.includes(script)) {
   const scriptLocation = require.resolve(scriptDir + script);
   const nodeArgs = scriptIndex > 0 ? args.slice(0, scriptIndex) : [];
