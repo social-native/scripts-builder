@@ -38,6 +38,9 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "cross-spawn": "^6.0.5"
+    "cross-spawn": "^6.0.5",
+    "strip-json-comments": "^2.0.1",
+    "tslint": "^5.16.0",
+    "tslint-eslint-rules": "^5.4.0"
   }
 }

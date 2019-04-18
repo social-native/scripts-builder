@@ -18,7 +18,7 @@ process.on('unhandledRejection', err => {
   });
 
 // Root directory of repo calling this script
-const rootDir = process.argv[1].replace('node_modules/.bin/snpkg-snapi-common', '');
+const originDir = process.argv[1].replace('node_modules/.bin/snpkg-snapi-common', '');
 // Script directory where scripts are located
 const scriptDir = process.argv[1].replace('.bin/', '').concat('/scripts/');
 
@@ -54,7 +54,7 @@ if (existingScripts.includes(script)) {
   const result = spawn.sync(
     'node',
     command,
-    { stdio: 'inherit' }
+    { stdio: 'inherit', argv0: originDir }
   );
 
   // process command result
