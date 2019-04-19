@@ -1,0 +1,18 @@
+{
+  "ignoreBinPackage": false, // ignore the packages with bin entry
+  "skipMissing": false, // skip calculation of missing dependencies
+  "ignoreDirs": [
+      // folder with these names will be ignored
+  ],
+  "ignoreMatches": [
+      // ignore dependencies that matches these globs
+    "react-scripts", 
+    "snpkg-snapi-common"
+  ],
+  "specials": [
+      // the target special parsers
+      // depcheck.special.tslint,
+      // depcheck.special.webpack,
+      // depcheck.special.babel
+  ]
+}
