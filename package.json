@@ -12,6 +12,8 @@
     "snpkg-snapi-common": "./bin/index.js"
   },
   "scripts": {
+    "install": "add circleci file and create symlink",
+    "preuninstall": "remmove circleci file",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run clean && rollup -c",
@@ -39,6 +41,7 @@
   },
   "dependencies": {
     "cross-spawn": "^6.0.5",
+    "prettier": "^1.17.0",
     "strip-json-comments": "^2.0.1",
     "tslint": "^5.16.0",
     "tslint-eslint-rules": "^5.4.0"
