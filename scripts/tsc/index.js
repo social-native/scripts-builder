@@ -26,10 +26,10 @@ const addAbsBasePath = (oldConfig, configPaths, basePath) => {
     if (!value) { 
       return 
     } else if (Array.isArray(value)) {
-      const newValues = value.map(v => path.resolve(basePath, v))
+      const newValues = value.map(v => path.isAbsolute(v) ? v : path.resolve(basePath, v))
       set(config, p, newValues)
     } else {
-      const newValue = path.resolve(basePath, value);
+      const newValue = path.isAbsolute(value) ? value : path.resolve(basePath, value);
       set(config, p, newValue)
     }
   })
@@ -42,6 +42,7 @@ const tsconfigValuesWithPaths = [
   'compilerOptions.baseUrl',
   'compilerOptions.declarationDir',
   'compilerOptions.rootDir',
+  'compilerOptions.rootDirs',
   'compilerOptions.mapRoot',
   'compilerOptions.sourceRoot',
   'compilerOptions.typeRoots',
