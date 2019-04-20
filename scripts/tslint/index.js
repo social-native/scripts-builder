@@ -30,7 +30,7 @@ if (fs.existsSync(generatedTSConfigLocation)) {
   const tsconfigRaw = fs.readFileSync(generatedTSConfigLocation, 'utf8');
   tsconfig = JSON.parse(stripJsonComments(tsconfigRaw));
 } else {
-  const defaultTSConfigLocation = path.resolve(__dirname, "../ts/config.json");
+  const defaultTSConfigLocation = path.resolve(__dirname, "../tsc/config.json");
   const tsconfigRaw = fs.readFileSync(defaultTSConfigLocation, 'utf8');
   tsconfig = JSON.parse(stripJsonComments(tsconfigRaw));
 }
