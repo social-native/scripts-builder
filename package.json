@@ -1,7 +1,7 @@
 {
-  "name": "snpkg-snapi-common",
+  "name": "scripts-builder",
   "version": "0.0.0",
-  "description": "Common code shared across SNAPI microservices",
+  "description": "Build npm scripts to share across projects",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -9,11 +9,9 @@
     "dist"
   ],
   "bin": {
-    "snpkg-snapi-common": "./bin/index.js"
+    "scripts-builder": "./bin/index.js"
   },
   "scripts": {
-    "install": "add circleci file and create symlink",
-    "preuninstall": "remmove circleci file",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run clean && rollup -c",
@@ -21,22 +19,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/social-native/snpkg-snapi-common.git"
+    "url": "git+https://github.com/social-native/scripts-builder.git"
   },
   "keywords": [
-    "SNAPI",
-    "SNPKG"
+    "node",
+    "scripts builder",
+    "create react app"
   ],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/social-native/snpkg-snapi-common/issues"
+    "url": "https://github.com/social-native/scripts-builder/issues"
   },
-  "homepage": "https://github.com/social-native/snpkg-snapi-common#readme",
+  "homepage": "https://github.com/social-native/scripts-builder#readme",
   "devDependencies": {
     "jest": "^24.1.0",
     "rollup": "^1.2.2",
-    "rollup-plugin-typescript2": "^0.19.2",
+    "rollup-plugin-typescript2": "^0.21.1",
     "typescript": "^3.3.3333"
   },
   "dependencies": {

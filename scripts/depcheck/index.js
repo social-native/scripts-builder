@@ -12,7 +12,8 @@ const path = require('path');
 const stripJsonComments = require('strip-json-comments');
 const execSync = require('child_process').execSync;
 const depcheck = require('depcheck');
-const originDir = process.argv0;
+// make sure origin directory is the first valid path outside all node module nesting
+const originDir = process.argv0.split('node_modules')[0];
 
 const processUnusedDevDependencies = (unusedDevDependencies, usedDependencies) => {
     const {types, nonTypes} = filterTypesAndNonTypeDependencies(unusedDevDependencies);

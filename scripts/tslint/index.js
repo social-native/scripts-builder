@@ -15,7 +15,8 @@ const execSync = require('child_process').execSync;
 let argv = process.argv.slice(2);
 const configLocation = path.resolve(__dirname, "./config.json");
 
-const originDir = process.argv0;
+// make sure origin directory is the first valid path outside all node module nesting
+const originDir = process.argv0.split('node_modules')[0];
 
 
 /**

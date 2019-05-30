@@ -16,8 +16,8 @@ const set = require('lodash.set');
 
 let argv = process.argv.slice(2);
 const configLocation = path.resolve(__dirname, "./config.json");
-const originDir = process.argv0;
-
+// make sure origin directory is the first valid path outside all node module nesting
+const originDir = process.argv0.split('node_modules')[0];
 
 const addAbsBasePath = (oldConfig, configPaths, basePath) => {
   config = JSON.parse(JSON.stringify(oldConfig))
