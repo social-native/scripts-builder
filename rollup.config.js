@@ -1,6 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import multiInput from 'rollup-plugin-multi-input';
 import copy from 'rollup-plugin-copy-glob';
+import hashbang from 'rollup-plugin-hashbang';
 
 import pkg from './package.json'
 
@@ -18,16 +19,28 @@ const commonPlugins = [
 ];
 
 export default [
-    {
-      input: 'src/bin.ts',
-      output: {
-        dir: 'dist',
-        format: 'cjs',
-      },
-      plugins: [
-        ...commonPlugins
-      ],
-      ...common
+  {
+    input: 'src/common.ts',
+    output: {
+      file: 'dist/index.ts',
+      format: 'cjs',
+    },
+    plugins: [
+      ...commonPlugins
+    ],
+    ...common
+  },
+  {
+    input: 'src/bin.ts',
+    output: {
+      dir: 'dist',
+      format: 'cjs',
+    },
+    plugins: [
+      hashbang(),
+      ...commonPlugins
+    ],
+    ...common
   },
   {
     input: ['src/scripts/**/*.ts'],
