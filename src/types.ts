@@ -3,9 +3,17 @@ export interface IState {
   [state: string]: any
 }
 
+export type Executor = (input: IState) => IState
+
 export interface IConfigObjInner {
   [state: string]: IConfigObjInner
 }
+
+/**
+ * ------------------------------------
+ * Executors
+ * -----------------------------------
+ */
 
 // initializeScript: input -> input
 export type InitializeScript = (input: IState) => IState
@@ -19,44 +27,44 @@ export type SetArgsObject = (input: IState) => {argsObj: {[arg: string]: string}
 export type IArgsObj = ReturnType<SetArgsObject>
 
 // setDefaultConfigPath: defaultPath -> input -> input + defaultConfigPath
-export type SetDefaultConfigPath = (defaultPath: string) => (input: IState) => { defaultConfigPath: string } & IState
+export type SetDefaultConfigPath = (config: {defaultPath: string}) => (input: IState) => { defaultConfigPath: string } & IState
 export type DefaultConfigPath = ReturnType<SetDefaultConfigPath>
 
 // getUserConfigPath: optionNames -> input + argsObj -> input + userSpecifiedConfigPath
-export type GetUserConfigPath = (optionNames: string[]) => (input: IState & IArgsObj) => { userSpecifiedConfigPath: string } & IState
+export type GetUserConfigPath = (config: {optionNames: string[]}) => (input: IState & IArgsObj) => { userSpecifiedConfigPath: string } & IState
 export type UserSpecifiedConfigPath = ReturnType<GetUserConfigPath>
 
 // getConfigPath: input + originDir + defaultConfigPath + userSpecifiedConfigPath -> input + configPath
-export type GetConfigPath = (input: IState & OriginDir & DefaultConfigPath & UserSpecifiedConfigPath) => (input: IState) => {configPath: string} & IState
+export type GetConfigPath = (input: IState & OriginDir & DefaultConfigPath & UserSpecifiedConfigPath) => {configPath: string} & IState
 export type ConfigPath = ReturnType<GetConfigPath>
 
 // getConfigObject: input + configPath -> input + configObj
 export type GetConfigObject = (input: IState & ConfigPath) => { configObj: IConfigObjInner } & IState
 export type ConfigObj = ReturnType<GetConfigObject>
 
-// removeOptionsFromArgsObj: optionNames -> input -> input 
-export type RemoveOptionsFromArgsObj = (optionNames: string[]) => (input: IState) => IArgsObj & IState
+// removeOptionsFromArgsObj: optionNames -> input + argsObj -> input + argsObj
+export type RemoveOptionsFromArgsObj = (config: {optionNames: string[]}) => (input: IState & IArgsObj) => IArgsObj & IState
 
-// updateOptionsArr: input + argsObj -> input
-export type UpdateArgsArr = (input: IState & IArgsObj) => {argsArr: string[]} & IState
-export type ArgsArr = ReturnType<UpdateArgsArr>
+// setArgsArr: input + argsObj -> input + argsArr
+export type SetArgsArr = (input: IState & IArgsObj) => {argsArr: string[]} & IState
+export type ArgsArr = ReturnType<SetArgsArr>
 
-// modifyRelativePathsInConfigObject: shouldModifyFunction, fieldsWithRelativePaths -> input + configObj + originDir -> input + configObj
-type IShouldModifyPath = { ShouldModifyPath: (optionName: string) => boolean };
+// modifyRelativePathsInConfigObject: shouldModifyPath, fieldsWithModifiablePaths -> input + configObj + originDir -> input + configObj
+type IShouldModifyPath = { shouldModifyPath: (optionName: string) => boolean };
 type IFieldsWithModifiablePaths = { fieldsWithModifiablePaths: string[] }
 export type ModifyRelativePathsInConfigObject = (config: IShouldModifyPath & IFieldsWithModifiablePaths & IState) => (input: ConfigObj & OriginDir) => ConfigObj & IState
 
-// addFieldsToConfigObject: (updater = input -> fieldsObj) -> input + originDir -> input + configObj
+// addFieldsToConfigObject: (updater = IState & OriginDir & ConfigObj -> { [fieldPath: string]: string | IConfigObjInner }) -> input + originDir + configObj -> input + configObj
 interface IFieldsUpdater {
-  fieldsUpdater: (fieldPath: string) => boolean
+  fieldsUpdater: (input: IState & OriginDir & ConfigObj) => { [fieldPath: string]: any }
 }
-export type AddFieldsToConfigObject = (config: IFieldsUpdater) => (input: IState & OriginDir) => ConfigObj & IState
+export type AddFieldsToConfigObject = (config: IFieldsUpdater) => (input: IState & ConfigObj & OriginDir) => ConfigObj & IState
 
-// writeConfigObjectToLocation: path -> input + configObj -> input + tempConfigObjPath
-export type WriteConfigObjectToLocation = (config: { path: string }) => (input: IState & ConfigObj) => { tempConfigPath: string } & IState
-export type TempConfigPath = ReturnType<WriteConfigObjectToLocation>
+// writeConfigObjectToPath: tempConfigPath -> input + configObj -> input + tempConfigFilePath
+export type WriteConfigObjectToPath = (config: { tempConfigPath: string }) => (input: IState & ConfigObj) => { tempConfigFilePath: string } & IState
+export type TempConfigPath = ReturnType<WriteConfigObjectToPath>
 
-// generateCommand: binLocation -> input + tempConfigObjPath + configObj + argsArr -> input + command
+// generateCommand: binLocation -> input + tempConfigFilePath + configObj + argsArr -> input + command
 export type GenerateCommand = (config: { scriptBinPath: string }) => (input: IState & TempConfigPath & ConfigObj & ArgsArr) => {command: string} & IState
 export type Command = ReturnType<GenerateCommand>
 
