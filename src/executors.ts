@@ -1,4 +1,4 @@
-import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, GetUserConfigPath, GetConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand } from './types';
+import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand, GenerateCommand } from './types';
 import yargs from "yargs";
 import { logger, LOG_LEVEL } from './common';
 import path from "path";
@@ -20,9 +20,11 @@ export const initializeScript = ((input) => {
     logger(LOG_LEVEL.ERROR, 'Error initializing script', err)
     throw err;
   });
-  console.log(input)
+
   return {...input}
 }) as InitializeScript
+
+
 /**
  * Sets the origin directory of the caller to state
  * input -> input + originDir
@@ -65,7 +67,7 @@ export const setDefaultConfigPath = (({ defaultPath }) => (input) => {
  * 
  * optionNames -> input + argsObject -> input + userSpecifiedConfigPath
  */
-export const getUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) => {
+export const setUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) => {
   const configOptionsSpecified = optionNames.filter(c => argsObj[c]);
   if (configOptionsSpecified.length > 1) {
     const message = `Can't specify multiple config options: ${optionNames}. They mean the same thing. Pick one!`;
@@ -76,7 +78,8 @@ export const getUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) =
 
     return { ...input, userSpecifiedConfigPath};
   }
-}) as GetUserConfigPath
+}) as SetUserConfigPath
+
 
 /**
  * Resolves the config path from either the user defined path or the default path, whichever is valid first
@@ -84,7 +87,7 @@ export const getUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) =
  * 
  * input + originDir + defaultConfigPath + userSpecifiedConfigPath -> input + configPath
  */
-export const getConfigPath = (({ originDir, defaultConfigPath, userSpecifiedConfigPath, ...input }) => {
+export const calcConfigPath = (({ originDir, defaultConfigPath, userSpecifiedConfigPath, ...input }) => {
   if (!userSpecifiedConfigPath) {
     return {...input, configPath: defaultConfigPath};
   }
@@ -97,7 +100,7 @@ export const getConfigPath = (({ originDir, defaultConfigPath, userSpecifiedConf
     p = defaultConfigPath;
   }
   return {...input, configPath: p}
-}) as GetConfigPath
+}) as CalcConfigPath
 
 
 /**
@@ -142,6 +145,7 @@ export const removeOptionsFromArgsObj = (({ optionNames }) => ({ argsObj, ...inp
 
   return { ...input, argsObj: newArgObject };
 }) as RemoveOptionsFromArgsObj
+
 
 /**
  * Creates an args array from an args object
@@ -201,7 +205,6 @@ export const modifyRelativePathsInConfigObject = (({ shouldModifyPath, fieldsWit
 
   return { ...input, configObj };
 }) as ModifyRelativePathsInConfigObject
-
 
 /**
  * Adds fields to the config object
@@ -276,4 +279,5 @@ export const executeCommand = (({ command, ...input }) => {
 }) as ExecuteCommand
 
 
-setArgsObject(setOriginDir(initializeScript({})))
+// setArgsObject(setOriginDir(initializeScript({})))
+
