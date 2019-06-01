@@ -1,24 +1,62 @@
-import typescript from 'rollup-plugin-typescript2'
+import typescript from 'rollup-plugin-typescript2';
+import multiInput from 'rollup-plugin-multi-input';
+import copy from 'rollup-plugin-copy-glob';
+import hashbang from 'rollup-plugin-hashbang';
+
 import pkg from './package.json'
-export default {
-  input: 'src/index.ts',
-  output: [
-    {
-      file: pkg.main,
-      format: 'cjs',
-    },
-    {
-      file: pkg.module,
-      format: 'es',
-    },
-  ],
+
+const common = {
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],
-plugins: [
-    typescript({
-      typescript: require('typescript'),
-    }),
-  ],
 }
+
+const commonPlugins = [
+  typescript({
+    typescript: require('typescript'),
+  }),
+];
+
+export default [
+  {
+    input: 'src/common.ts',
+    output: {
+      file: 'dist/index.ts',
+      format: 'cjs',
+    },
+    plugins: [
+      ...commonPlugins
+    ],
+    ...common
+  },
+  {
+    input: 'src/bin.ts',
+    output: {
+      dir: 'dist',
+      format: 'cjs',
+    },
+    plugins: [
+      hashbang(),
+      ...commonPlugins
+    ],
+    ...common
+  },
+  {
+    input: ['src/scripts/**/*.ts'],
+    output: {
+      format: 'cjs',
+      dir: 'dist'
+    },
+    plugins: [ 
+      multiInput(),
+      copy([
+        { files: 'src/**/*.json', dest: 'dist' },
+        { files: 'src/**/*.yml', dest: 'dist' },
+        { files: 'src/**/*.yaml', dest: 'dist' },
+      ], { verbose: true, watch: false }),
+      ...commonPlugins
+    ],
+    ...common
+  }
+]
