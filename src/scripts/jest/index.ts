@@ -3,7 +3,6 @@ import {
   LOG_LEVEL,
   compileArgs,
   initializeScript,
-  //   scriptArgs,
   getDefaultConfigPath,
   getOriginDir,
   getParsedArgs,
@@ -24,8 +23,7 @@ logger(LOG_LEVEL.DEBUG, "------------");
 
 // setup
 initializeScript();
-// // get user passed in args
-// let argv = scriptArgs();
+
 // set the default config location
 const defaultConfigPath = getDefaultConfigPath("config.js");
 // set the directory of the callee repo
