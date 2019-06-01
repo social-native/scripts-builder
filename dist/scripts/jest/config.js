@@ -13,6 +13,5 @@ var config = {
     verbose: true,
     testPathIgnorePatterns: ["/node_modules/", ".*test.ts.snap"]
 };
-//# sourceMappingURL=config.js.map
 
 module.exports = config;

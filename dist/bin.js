@@ -24,7 +24,6 @@ var LOG_LEVEL;
 const logger = (level, message, data) => {
     data ? console.log(level, message, data) : console.log(level, message);
 };
-//# sourceMappingURL=common.js.map
 
 /**
  * Based on react-scripts (licensed under MIT)

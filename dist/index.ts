@@ -191,7 +191,6 @@ const addAbsPathsToConfigPaths = (configObject, modifiableConfigPaths, originPat
     logger(exports.LOG_LEVEL.DEBUG, "Added abs paths to config", configObject);
     return configObject;
 };
-//# sourceMappingURL=common.js.map
 
 exports.addAbsPathsToConfigPaths = addAbsPathsToConfigPaths;
 exports.compileArgs = compileArgs;
