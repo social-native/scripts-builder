@@ -14,14 +14,14 @@ export const initializeScript = ((input) => {
 }) as InitializeScript
 
 
-// // setOriginDir: input -> input + originDir
+// setOriginDir: input -> input + originDir
 export const setOriginDir = ((input) => {
   const originDir = process.argv0.split("node_modules")[0];
   return { ...input, originDir }
 }) as SetOriginDir
 
 
-// // setArgsObject: input -> input + argsObject
+// setArgsObject: input -> input + argsObject
 export const setArgsObject = ((input) => {
   const argsArr = process.argv.slice(2);
   const argsObj = yargs.parse(argsArr) as IArgsObj['argsObj'];
@@ -30,7 +30,13 @@ export const setArgsObject = ((input) => {
 
 const executors = [initializeScript, setOriginDir, setArgsObject]
 
-executors.reduce((acc, e) => e(acc), {} as IState)
+const middleware = [
+  (input: IState) => input
+]
+
+const curry = (acc, e) => e(acc)
+const applyMiddleware = (input) => middleware.reduce(curry, input as IState)
+executors.reduce(applyMiddleware(curry), {} as IState)
 
 setArgsObject(setOriginDir(initializeScript({})))
 
