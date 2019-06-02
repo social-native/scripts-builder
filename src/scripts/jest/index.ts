@@ -3,7 +3,7 @@ import { initializeScript, setOriginDir, setArgsObject, setDefaultConfigPath,
   setUserConfigPath, 
   calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand 
 } from "../../executors";
-import { loggingEntryAndExit, logStateChange } from "../../middleware";
+import { logEntryAndExit, logStateChange } from "../../middleware";
 import { applyMiddleware } from "../../applyMiddleware";
 import { Executor, GenerateCommand } from "../../types";
 
@@ -57,7 +57,7 @@ const executors = [
 
 const middleware = [
   logStateChange,
-  loggingEntryAndExit,
+  logEntryAndExit,
 ]
 
 const script = applyMiddleware(executors, middleware)

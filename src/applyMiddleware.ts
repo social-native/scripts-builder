@@ -4,13 +4,13 @@ const evaluator = (executor: Executor, state: IState) => executor(state);
 
 type Script = () => IState;
 
-export const applyMiddleware = <E extends Executor, M extends Middleware>(executors: E[], middleware: M[]) => (() => {
-  const compiled = middleware.reduce((acc, m: M) => {
+export const applyMiddleware = <E extends Executor, M extends Middleware>(executors: E[], middleware?: M[]) => (() => {
+  const compiled = middleware && middleware.reduce((acc, m: M) => {
     return m(acc)
   }, evaluator)
 
   return executors.reduce((state, executor: E) => {
-    if (!compiled) {
+    if (!compiled || !middleware || middleware.length === 0) {
       return executor(state)
     }
     return compiled(executor,state)

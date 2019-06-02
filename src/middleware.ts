@@ -5,7 +5,7 @@ import { detailedDiff } from 'deep-object-diff';
 import chalk from "chalk";
 
 
-export const loggingEntryAndExit = ((next: Next) => (executor: Executor, state: IState) => {
+export const logEntryAndExit = ((next: Next) => (executor: Executor, state: IState) => {
     const name = executor.prototype ? executor.prototype.name : 'Unnamed Function'
     logger(LOG_LEVEL.DEBUG, 'Executor:', name)
     const nextState = next(executor, state)
@@ -32,5 +32,5 @@ export const logStateChange = ((next: Next) => (executor: Executor, state: IStat
     })
 
     return nextState;
-})
+}) as Middleware
 
