@@ -1,6 +1,4 @@
 import {
-  logger,
-  LOG_LEVEL,
   compileArgs,
   initializeScript,
   getDefaultConfigPath,
@@ -12,6 +10,12 @@ import {
   addAbsPathsToConfigPaths,
   importConfig
 } from "common";
+
+import {
+  logger,
+  LOG_LEVEL,
+} from 'logger'
+
 import fs from "fs";
 // import stripJsonComments from "strip-json-comments";
 import path from "path";

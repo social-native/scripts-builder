@@ -1,6 +1,6 @@
 import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand } from './types';
 import yargs from "yargs";
-import { logger, LOG_LEVEL } from './common';
+import { logger, LOG_LEVEL } from './logger';
 import path from "path";
 import fs from "fs";
 import stripJsonComments from "strip-json-comments";
@@ -87,7 +87,7 @@ export const setUserConfigPath = (function({ optionNames }) {
 
       return { ...input, argsObj, userSpecifiedConfigPath};
     }
-    return { ...input, argsObj}
+    return { ...input, argsObj, userSpecifiedConfigPath: undefined}
   }) as ReturnType<SetUserConfigPath>
   fn.prototype.name = 'setUserConfigPath'
   return fn;
@@ -102,7 +102,7 @@ export const setUserConfigPath = (function({ optionNames }) {
  */
 export const calcConfigPath = (function ({ originDir, defaultConfigPath, userSpecifiedConfigPath, ...input }) {
   if (!userSpecifiedConfigPath) {
-    return {...input, configPath: defaultConfigPath};
+    return {...input, originDir, defaultConfigPath, userSpecifiedConfigPath, configPath: defaultConfigPath};
   }
 
   const userConfigPath = path.resolve(originDir, userSpecifiedConfigPath);
@@ -285,6 +285,7 @@ export const writeConfigObjectToPath = (function ({ tempConfigFilePath }) {
   return fn;
 }) as WriteConfigObjectToPath
 
+// Note: generateCommand is not enabled because it is too specific. This executor will have to be generated for each script  
 // // generateCommand: binLocation -> input + tempConfigObjPath + configObj + argsArr -> input + command
 // export type GenerateCommand = (config: { scriptBinPath: string }) => (input: IState & TempConfigPath & ConfigObj & ArgsArr) => {command: string} & IState
 // export type Command = ReturnType<GenerateCommand>
@@ -305,13 +306,10 @@ export const executeCommand = (function ({ command, ...input }) {
       code: 1 
     };
 
-    // process.exit(1);
+    process.exit(1);
   }
 
   return { ...input, commandStatus}
 }) as ExecuteCommand
 executeCommand.prototype.name = 'executeCommand'
-
-
-// setArgsObject(setOriginDir(initializeScript({})))
 

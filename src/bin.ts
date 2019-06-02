@@ -8,7 +8,7 @@
 import spawn from "cross-spawn";
 import fs from "fs";
 import path from "path";
-import { logger, LOG_LEVEL } from "common";
+import { logger, LOG_LEVEL } from "logger";
 
 logger(LOG_LEVEL.DEBUG, "Running main binary");
 

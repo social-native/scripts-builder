@@ -4,25 +4,15 @@ import fs from "fs";
 import get from "lodash.get";
 import set from "lodash.set";
 import stripJsonComments from "strip-json-comments";
-
+import { LOG_LEVEL, logger } from './logger'
 /**
  * Common code shared by `bin.js` and `scripts/`
  */
 
-export enum LOG_LEVEL {
-  DEBUG = "debug",
-  INFO = "info",
-  WARN = "warn",
-  ERROR = "error"
-}
-export const logger = (level: LOG_LEVEL, message: string, data?: any) => {
-  data ? console.log(level, message, data) : console.log(level, message);
-};
 
 export interface IArgObject {
   [argName: string]: string;
 }
-
 /**
  * Creates a process.arg array from an object of { argName: argValue }
  */
