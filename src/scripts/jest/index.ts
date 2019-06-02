@@ -1,7 +1,7 @@
 import path from "path";
 import { GenerateCommand } from "../../types";
 import { initializeScript, setOriginDir, setArgsObject, setDefaultConfigPath, setUserConfigPath, calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand } from "../../executors";
-import { logging } from "../../middleware";
+import { loggingEntryAndExit, logStateChange } from "../../middleware";
 
 const generateJestCommand = (({ tempConfigFilePath, configObj, argsArr, ...input }) => {
   const commandArgs = argsArr.concat(`--config ${tempConfigFilePath}`);
@@ -52,7 +52,8 @@ const executors = [
 ]
 
 const middleware = [
-  logging
+  loggingEntryAndExit,
+  logStateChange
 ]
 
 export {

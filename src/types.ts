@@ -4,7 +4,9 @@ export interface IState {
 }
 
 export type Executor = (input: IState) => IState
-export type Middleware = (state: IState, executor: Executor) => IState;
+
+export type Next = (executor: Executor, state: IState) => IState
+export type Middleware = (next: Next) => Next;
 
 export interface IConfigObjInner {
   [state: string]: IConfigObjInner

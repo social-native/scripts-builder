@@ -233,12 +233,12 @@ export const addFieldsToConfigObject = (({ fieldsUpdater }) => ({ originDir, con
  * 
  * path -> input + configObj -> input + tempConfigFilePath
  */
-export const writeConfigObjectToPath = (({ tempConfigPath }) => ({ configObj, ...input}) => {
+export const writeConfigObjectToPath = (({ tempConfigFilePath }) => ({ configObj, ...input}) => {
   let absPath;
-  if (path.isAbsolute(tempConfigPath)) {
-    absPath = tempConfigPath;
+  if (path.isAbsolute(tempConfigFilePath)) {
+    absPath = tempConfigFilePath;
   } else {
-    absPath = path.resolve(__dirname, tempConfigPath);
+    absPath = path.resolve(__dirname, tempConfigFilePath);
   }
 
   const configExtName = path.extname(absPath);
