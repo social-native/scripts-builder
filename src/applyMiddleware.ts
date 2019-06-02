@@ -2,12 +2,12 @@ import { Executor, Middleware, IState } from "./types";
 
 const evaluator = (executor: Executor, state: IState) => executor(state);
 
-export const applyMiddleware = (executors: Executor[], middleware: Middleware[]) => () => {
-  const compiled = middleware.reduce((acc, m: Middleware) => {
+export const applyMiddleware = <E extends Executor, M extends Middleware>(executors: E[], middleware: M[]) => () => {
+  const compiled = middleware.reduce((acc, m: M) => {
     return m(acc)
   }, evaluator)
 
-  return executors.reduce((state, executor: Executor) => {
+  return executors.reduce((state, executor: E) => {
     if (!compiled) {
       return executor(state)
     }

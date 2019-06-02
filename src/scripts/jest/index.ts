@@ -1,7 +1,11 @@
 import path from "path";
-import { GenerateCommand } from "../../types";
-import { initializeScript, setOriginDir, setArgsObject, setDefaultConfigPath, setUserConfigPath, calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand } from "../../executors";
+import { initializeScript, setOriginDir, setArgsObject, setDefaultConfigPath, 
+  setUserConfigPath, 
+  calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand 
+} from "../../executors";
 import { loggingEntryAndExit, logStateChange } from "../../middleware";
+import { applyMiddleware } from "../../applyMiddleware";
+import { Executor, GenerateCommand } from "../../types";
 
 const generateJestCommand = (({ tempConfigFilePath, configObj, argsArr, ...input }) => {
   const commandArgs = argsArr.concat(`--config ${tempConfigFilePath}`);
@@ -46,17 +50,15 @@ const executors = [
       'rootDir': originDir
     })
   }),
-  writeConfigObjectToPath({ tempConfigFilePath: './generatedConfig.js'}),
+  writeConfigObjectToPath({ tempConfigFilePath: './generatedConfig.json'}),
   generateJestCommand,
   executeCommand,
-]
+] as Executor[]
 
 const middleware = [
+  logStateChange,
   loggingEntryAndExit,
-  logStateChange
 ]
 
-export {
-  executors,
-  middleware
-}
+const script = applyMiddleware(executors, middleware)
+script()

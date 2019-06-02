@@ -1,4 +1,4 @@
-import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand, GenerateCommand } from './types';
+import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand } from './types';
 import yargs from "yargs";
 import { logger, LOG_LEVEL } from './common';
 import path from "path";
@@ -12,7 +12,7 @@ import { execSync } from "child_process";
  * Initialize a script
  * input -> input
  */
-export const initializeScript = ((input) => {
+export const initializeScript = (function(input) {
   // Makes the script crash on unhandled rejections instead of silently
   // ignoring them. In the future, promise rejections that are not handled will
   // terminate the Node.js process with a non-zero exit code.
@@ -23,16 +23,18 @@ export const initializeScript = ((input) => {
 
   return {...input}
 }) as InitializeScript
+initializeScript.prototype.name = 'initializeScript'
 
 
 /**
  * Sets the origin directory of the caller to state
  * input -> input + originDir
  */
-export const setOriginDir = ((input) => {
+export const setOriginDir = (function(input) {
   const originDir = process.argv0.split("node_modules")[0];
   return { ...input, originDir }
 }) as SetOriginDir
+setOriginDir.prototype.name = 'setOriginDir'
 
 
 /**
@@ -40,11 +42,12 @@ export const setOriginDir = ((input) => {
  * 
  * input -> input + argsObject
  */
-export const setArgsObject = ((input) => {
+export const setArgsObject = (function(input) {
   const argsArr = process.argv.slice(2);
   const argsObj = yargs.parse(argsArr) as IArgsObj['argsObj'];
   return { ...input, argsObj }
 }) as SetArgsObject
+setArgsObject.prototype.name = 'setArgsObject'
 
 
 /**
@@ -54,10 +57,15 @@ export const setArgsObject = ((input) => {
  * defaultPath -> input -> input + defaultConfigPath
  */
 // // setDefaultConfigPath: defaultPath -> input -> input + defaultConfigPath
-export const setDefaultConfigPath = (({ defaultPath }) => (input) => {
-  const defaultConfigPath = path.resolve(__dirname, defaultPath);
-  return { ...input, defaultConfigPath}
+export const setDefaultConfigPath = (function({ defaultPath }) { 
+  const fn = (function(input) {
+    const defaultConfigPath = path.resolve(__dirname, defaultPath);
+    return { ...input, defaultConfigPath}
+  }) as ReturnType<SetDefaultConfigPath>
+  fn.prototype.name = 'setDefaultConfigPath'
+  return fn;
 }) as SetDefaultConfigPath
+// setDefaultConfigPath.prototype.name = 'setDefaultConfigPath'
 
 
 /**
@@ -67,17 +75,22 @@ export const setDefaultConfigPath = (({ defaultPath }) => (input) => {
  * 
  * optionNames -> input + argsObject -> input + userSpecifiedConfigPath
  */
-export const setUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) => {
-  const configOptionsSpecified = optionNames.filter(c => argsObj[c]);
-  if (configOptionsSpecified.length > 1) {
-    const message = `Can't specify multiple config options: ${optionNames}. They mean the same thing. Pick one!`;
-    logger(LOG_LEVEL.ERROR, message);
-    process.exit(1);
-  } else if (configOptionsSpecified.length === 1) {
-    const userSpecifiedConfigPath = argsObj[configOptionsSpecified[0]];
+export const setUserConfigPath = (function({ optionNames }) { 
+  const fn = (function({ argsObj, ...input }) {
+    const configOptionsSpecified = optionNames.filter(c => argsObj[c]);
+    if (configOptionsSpecified.length > 1) {
+      const message = `Can't specify multiple config options: ${optionNames}. They mean the same thing. Pick one!`;
+      logger(LOG_LEVEL.ERROR, message);
+      process.exit(1);
+    } else if (configOptionsSpecified.length === 1) {
+      const userSpecifiedConfigPath = argsObj[configOptionsSpecified[0]];
 
-    return { ...input, userSpecifiedConfigPath};
-  }
+      return { ...input, argsObj, userSpecifiedConfigPath};
+    }
+    return { ...input, argsObj}
+  }) as ReturnType<SetUserConfigPath>
+  fn.prototype.name = 'setUserConfigPath'
+  return fn;
 }) as SetUserConfigPath
 
 
@@ -87,7 +100,7 @@ export const setUserConfigPath = (({ optionNames }) => ({ argsObj, ...input }) =
  * 
  * input + originDir + defaultConfigPath + userSpecifiedConfigPath -> input + configPath
  */
-export const calcConfigPath = (({ originDir, defaultConfigPath, userSpecifiedConfigPath, ...input }) => {
+export const calcConfigPath = (function ({ originDir, defaultConfigPath, userSpecifiedConfigPath, ...input }) {
   if (!userSpecifiedConfigPath) {
     return {...input, configPath: defaultConfigPath};
   }
@@ -99,8 +112,9 @@ export const calcConfigPath = (({ originDir, defaultConfigPath, userSpecifiedCon
   } else {
     p = defaultConfigPath;
   }
-  return {...input, configPath: p}
+  return {...input, originDir, defaultConfigPath, userSpecifiedConfigPath, configPath: p}
 }) as CalcConfigPath
+calcConfigPath.prototype.name = 'calcConfigPath'
 
 
 /**
@@ -108,7 +122,7 @@ export const calcConfigPath = (({ originDir, defaultConfigPath, userSpecifiedCon
  * 
  * input + configPath -> input + configObj
  */
-export const getConfigObject = (({ configPath, ...input }) => {
+export const getConfigObject = (function ({ configPath, ...input }) {
   const configExtName = path.extname(configPath);
 
   let configObj;
@@ -124,8 +138,9 @@ export const getConfigObject = (({ configPath, ...input }) => {
     process.exit(1);
   }
 
-  return { ...input, configObj}
+  return { ...input, configPath, configObj}
 }) as GetConfigObject
+getConfigObject.prototype.name = 'getConfigObject'
 
 
 /**
@@ -135,15 +150,19 @@ export const getConfigObject = (({ configPath, ...input }) => {
  * 
  * optionNames -> input + argsObj -> input + argsObj
  */
-export const removeOptionsFromArgsObj = (({ optionNames }) => ({ argsObj, ...input}) => {
-  const newArgObject = { ...argsObj };
-  optionNames.forEach(o => {
-    if (newArgObject[o]) {
-      delete newArgObject[o];
-    }
-  });
+export const removeOptionsFromArgsObj = (function({ optionNames }) { 
+  const fn = (function({ argsObj, ...input}) {
+    const newArgObject = { ...argsObj };
+    optionNames.forEach(o => {
+      if (newArgObject[o]) {
+        delete newArgObject[o];
+      }
+    });
 
-  return { ...input, argsObj: newArgObject };
+    return { ...input, argsObj: newArgObject };
+  }) as ReturnType<RemoveOptionsFromArgsObj>
+  fn.prototype.name = 'removeOptionsFromArgsObj'
+  return fn;
 }) as RemoveOptionsFromArgsObj
 
 
@@ -153,7 +172,7 @@ export const removeOptionsFromArgsObj = (({ optionNames }) => ({ argsObj, ...inp
  * 
  * input + argsObj -> input + argsArr
  */
-export const setArgsArr = (({ argsObj, ...input }) => {
+export const setArgsArr = (function ({ argsObj, ...input }) {
   const argsArr = Object.keys(argsObj).reduce(
     (acc, option) => {
       if (option === "_" || option === "$0") return acc;
@@ -168,8 +187,9 @@ export const setArgsArr = (({ argsObj, ...input }) => {
     },
     [] as Array<string>
   );
-  return {...input, argsArr};
+  return {...input, argsObj, argsArr};
 }) as SetArgsArr
+setArgsArr.prototype.name = 'setArgsArr'
 
 
 /**
@@ -181,29 +201,34 @@ export const setArgsArr = (({ argsObj, ...input }) => {
  * 
  * shouldModifyPath, fieldsWithModifiablePaths -> input + configObj + originDir -> input + configObj
  */
-export const modifyRelativePathsInConfigObject = (({ shouldModifyPath, fieldsWithModifiablePaths }) => ({ configObj, originDir, ...input}) => {
-  fieldsWithModifiablePaths.forEach(p => {
-    // TODO FIX ME
-    const value = get(configObj, p) as any as string;
-    if (!value) {
-      return;
-    } else if (Array.isArray(value)) {
-      const newValues = value.map(v =>
-        !shouldModifyPath(v) || path.isAbsolute(v)
-          ? v
-          : path.resolve(originDir, v)
-      );
-      set(configObj, p, newValues);
-    } else {
-      const newValue =
-        !shouldModifyPath(value) || path.isAbsolute(value)
-          ? value
-          : path.resolve(originDir, value);
-      set(configObj, p, newValue);
-    }
-  });
+export const modifyRelativePathsInConfigObject = (function({ shouldModifyPath, fieldsWithModifiablePaths }) { 
+  const fn = (function({ configObj, originDir, ...input}) {
+    fieldsWithModifiablePaths.forEach(p => {
+      // TODO FIX ME
+      const value = get(configObj, p) as any as string;
+      if (!value) {
+        return;
+      } else if (Array.isArray(value)) {
+        const newValues = value.map(v =>
+          !shouldModifyPath(v) || path.isAbsolute(v)
+            ? v
+            : path.resolve(originDir, v)
+        );
+        set(configObj, p, newValues);
+      } else {
+        const newValue =
+          !shouldModifyPath(value) || path.isAbsolute(value)
+            ? value
+            : path.resolve(originDir, value);
+        set(configObj, p, newValue);
+      }
+    });
 
-  return { ...input, configObj };
+    return { ...input, configObj, originDir };
+  }) as ReturnType<ModifyRelativePathsInConfigObject>
+  fn.prototype.name = 'modifyRelativePathsInConfigObject'
+
+  return fn;
 }) as ModifyRelativePathsInConfigObject
 
 /**
@@ -215,16 +240,20 @@ export const modifyRelativePathsInConfigObject = (({ shouldModifyPath, fieldsWit
  * 
  * (updater = IState & OriginDir & ConfigObj -> { [fieldPath: string]: string | IConfigObjInner }) -> input + originDir + configObj -> input + configObj
  */
-export const addFieldsToConfigObject = (({ fieldsUpdater }) => ({ originDir, configObj, ...input }) => {
-  const newConfigObj = { ...configObj };
-  const fieldPathsToModify = fieldsUpdater({configObj, originDir, input});
+export const addFieldsToConfigObject = (function({ fieldsUpdater }) { 
+  const fn = (function({ originDir, configObj, ...input }) {
+    const newConfigObj = { ...configObj };
+    const fieldPathsToModify = fieldsUpdater({configObj, originDir, input});
 
-  Object.keys(fieldPathsToModify).forEach(path => {
-    const value = fieldPathsToModify[path];
-    set(newConfigObj, path, value)
-  })
+    Object.keys(fieldPathsToModify).forEach(path => {
+      const value = fieldPathsToModify[path];
+      set(newConfigObj, path, value)
+    })
 
-  return { ...input, originDir, configObj: newConfigObj}
+    return { ...input, originDir, configObj: newConfigObj}
+  }) as ReturnType<AddFieldsToConfigObject>
+  fn.prototype.name = 'addFieldsToConfigObject'
+  return fn;
 }) as AddFieldsToConfigObject
 
 
@@ -233,23 +262,27 @@ export const addFieldsToConfigObject = (({ fieldsUpdater }) => ({ originDir, con
  * 
  * path -> input + configObj -> input + tempConfigFilePath
  */
-export const writeConfigObjectToPath = (({ tempConfigFilePath }) => ({ configObj, ...input}) => {
-  let absPath;
-  if (path.isAbsolute(tempConfigFilePath)) {
-    absPath = tempConfigFilePath;
-  } else {
-    absPath = path.resolve(__dirname, tempConfigFilePath);
-  }
+export const writeConfigObjectToPath = (function ({ tempConfigFilePath }) { 
+  const fn = (function({ configObj, ...input}) {
+    let absPath;
+    if (path.isAbsolute(tempConfigFilePath)) {
+      absPath = tempConfigFilePath;
+    } else {
+      absPath = path.resolve(__dirname, tempConfigFilePath);
+    }
 
-  const configExtName = path.extname(absPath);
+    const configExtName = path.extname(absPath);
 
 
-  fs.writeFileSync(
-    absPath,
-    configExtName === '.json' ? JSON.stringify(configObj, null, 2) : configObj
-  );
+    fs.writeFileSync(
+      absPath,
+      configExtName === '.json' ? JSON.stringify(configObj, null, 2) : configObj
+    );
 
-  return { ...input, tempConfigFilePath: absPath } 
+    return { ...input, configObj, tempConfigFilePath: absPath } 
+  }) as ReturnType<WriteConfigObjectToPath>
+  fn.prototype.name = 'writeConfigObjectToPath'
+  return fn;
 }) as WriteConfigObjectToPath
 
 // // generateCommand: binLocation -> input + tempConfigObjPath + configObj + argsArr -> input + command
@@ -261,7 +294,7 @@ export const writeConfigObjectToPath = (({ tempConfigFilePath }) => ({ configObj
  * 
  * input + command -> input + commandStatus
  */
-export const executeCommand = (({ command, ...input }) => {
+export const executeCommand = (function ({ command, ...input }) {
   let commandStatus
   try {
     execSync(command, { stdio: "inherit" });
@@ -277,6 +310,7 @@ export const executeCommand = (({ command, ...input }) => {
 
   return { ...input, commandStatus}
 }) as ExecuteCommand
+executeCommand.prototype.name = 'executeCommand'
 
 
 // setArgsObject(setOriginDir(initializeScript({})))

@@ -78,7 +78,7 @@ const result = spawn.sync("node", command, {
   stdio: "inherit",
   argv0: originDir
 });
-logger(LOG_LEVEL.DEBUG, "Script result", result);
+// logger(LOG_LEVEL.DEBUG, "Script result", result);
 
 // process command result
 if (result.signal) {
