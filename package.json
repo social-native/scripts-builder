@@ -9,7 +9,7 @@
     "dist"
   ],
   "bin": {
-    "snpkg-snapi-scripts": "./dist/bin.js"
+    "scripts-builder": "./dist/bin.js"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/social-native/scripts-builder#readme",
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.0",
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.set": "^4.3.6",
     "@types/prettier": "^1.16.4",
@@ -46,7 +47,6 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "@types/cross-spawn": "^6.0.0",
     "chalk": "^2.4.2",
     "cross-spawn": "^6.0.5",
     "deep-object-diff": "^1.1.0",
