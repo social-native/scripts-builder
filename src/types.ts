@@ -74,3 +74,5 @@ export type Command = ReturnType<GenerateCommand>
 // executeCommand -> input -> input + commandStatus
 export type ExecuteCommand = (input: IState & Command) => {commandStatus?: {message?: string, code?: number}} & IState
 export type CommandResponse = ReturnType<ExecuteCommand>
+
+export type SetSpecifiedOriginDir = (input: IState & IArgsObj) => IArgsObj & OriginDir & IState;

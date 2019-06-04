@@ -1,4 +1,4 @@
-import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand } from './types';
+import { InitializeScript, SetOriginDir, SetArgsObject, IArgsObj, SetDefaultConfigPath, SetUserConfigPath, CalcConfigPath, GetConfigObject, RemoveOptionsFromArgsObj, SetArgsArr, ModifyRelativePathsInConfigObject, AddFieldsToConfigObject, WriteConfigObjectToPath, ExecuteCommand, SetSpecifiedOriginDir, IState, OriginDir } from './types';
 import yargs from "yargs";
 import { logger, LOG_LEVEL } from './logger';
 import path from "path";
@@ -313,3 +313,162 @@ export const executeCommand = (function ({ command, ...input }) {
 }) as ExecuteCommand
 executeCommand.prototype.name = 'executeCommand'
 
+/**
+ * FORWARD BUILT originDir
+ */
+export const setSpecifiedOriginDir = (function({ argsObj, ...input }) {
+  const originDir = argsObj['@scriptsBuilderOriginDir'];
+
+  return { ...input, argsObj, originDir}
+}) as SetSpecifiedOriginDir
+setSpecifiedOriginDir.prototype.name = 'setSpecifiedOriginDir'
+
+export const setConfigFileName = (function({ configFileName }: { configFileName: string }) { 
+  const fn = (function(input: IState) {
+    return { ...input, configFileName }
+  })
+  fn.prototype.name = 'setConfigFileName';
+  return fn
+})
+
+enum LOCATION {
+  ABOVE = 'above',
+  BELOW = 'below',
+  EVEN = 'even'
+}
+
+export type SetLastDirToCallProcess = (input: IState) => {dirToCallProcess: string} & IState
+export type DirToCallProcess = ReturnType<SetLastDirToCallProcess>
+
+export const setLastDirToCallProcess = (function(state) {
+  const dirToCallProcess = process.argv[1].split('node_modules')[0];
+  return {...state, dirToCallProcess}
+}) as SetLastDirToCallProcess
+setLastDirToCallProcess.prototype.name = 'setLastDirToCallProcess'
+
+export const calcScriptsBuilderLocationRelativeToCallee = (function({originDir, ...input}: IState & OriginDir ) {
+  const scriptsBuilderDir = path.resolve(__dirname).split('/').length
+  const callee = path.resolve(originDir).split('/').length
+
+  let location: LOCATION
+  if (scriptsBuilderDir < callee) {
+    location = LOCATION.ABOVE
+  } else if (scriptsBuilderDir > callee) {
+    location = LOCATION.BELOW
+  } else {
+    location = LOCATION.EVEN
+  }
+
+  return {...input, originDir, scriptsBuilderLocationRelativeToCallee: location }
+})
+calcScriptsBuilderLocationRelativeToCallee.prototype.name = 'calcScriptsBuilderLocationRelativeToCallee'
+
+type FindFn = (currentDir: string, state: IState) => string | undefined
+const walkUpwardsApplyingFindFn = (dirOne: string, dirTwo: string, findFn: FindFn, state: IState) => {
+  let shortDir: string[]
+  let longDir: string[]
+
+  const dirOneArr = dirOne.split('/');
+  const dirTwoArr = dirTwo.split('/');
+
+  if (dirOneArr.length < dirTwoArr.length) {
+    shortDir = dirOneArr
+    longDir = dirTwoArr
+  } else {
+    longDir = dirOneArr
+    shortDir = dirTwoArr
+  }
+
+    let foundDir = undefined
+    while (longDir.length > shortDir.length) {
+      const result = findFn(longDir.join('/'), state);
+      if (result) {
+        // replace existing if found to allow higher dirs that match the findFn to take precedence
+        foundDir = result
+      }
+      longDir.pop()
+    }
+    return foundDir
+  
+}
+
+type TraverseDirectoriesAndFind = (config: {findFn: FindFn}) => (input: IState & OriginDir & DirToCallProcess) => { traversedAndFoundDirectory?: string } & OriginDir & IState 
+type TraversedAndFoundDirectory = ReturnType<ReturnType<TraverseDirectoriesAndFind>>
+
+export const traverseDirectoriesAndFind = (function({findFn}) {
+  const fn = (function({originDir, dirToCallProcess, ...state}) {
+    const scriptsBuilderDir = path.resolve(__dirname);
+    const calleeDir = path.resolve(originDir);
+    const dirToCallProcessDir = path.resolve(dirToCallProcess);
+
+    const fullState = {...state, originDir, dirToCallProcess};
+    let foundDir: string | undefined;
+    foundDir = 
+      findFn(calleeDir, fullState) || // most priority
+      findFn(dirToCallProcessDir, fullState) ||
+      walkUpwardsApplyingFindFn(scriptsBuilderDir, calleeDir, findFn, fullState) // least priority
+
+    return { ...state, originDir, dirToCallProcess, traversedAndFoundDirectory: foundDir}
+  }) as ReturnType<TraverseDirectoriesAndFind>;
+  fn.prototype.name = 'traverseDirectoriesAndFind'
+  return fn
+}) as TraverseDirectoriesAndFind
+
+export type SetScriptName = (input: IState) => {scriptName: string} & IState
+export type ScriptName = ReturnType<SetScriptName>
+
+export const setScriptName = (function(state) {
+  const scriptName = process.argv[2];
+  return { ...state, scriptName}
+}) as SetScriptName
+setScriptName.prototype.name = 'setScriptName'
+
+export const extractAndSetConfiguredScriptInfo = (function({traversedAndFoundDirectory, scriptName, ...state}: IState & TraversedAndFoundDirectory & ScriptName) {
+  if (!traversedAndFoundDirectory) {
+    logger(LOG_LEVEL.ERROR, 'Error specifying package.json location', traversedAndFoundDirectory)
+    return { ...state, traversedAndFoundDirectory, scriptName}
+  }
+
+  const packageJSON = require(traversedAndFoundDirectory)
+  if (!packageJSON || !packageJSON.scriptsBuilder) {
+    logger(LOG_LEVEL.ERROR, 'package.json not found at location:', traversedAndFoundDirectory)
+    return { ...state, traversedAndFoundDirectory, scriptName}
+  }
+
+  const aliasInformation = packageJSON.scriptsBuilder[scriptName]
+  if (!aliasInformation) {
+    logger(LOG_LEVEL.ERROR, 'script alias not found', scriptName)
+    return { ...state, traversedAndFoundDirectory, scriptName}
+  }
+
+  const { scriptName: newScriptName, configFilename } = aliasInformation;
+
+  return {...state, traversedAndFoundDirectory, scriptName: newScriptName, configFilename}
+})
+extractAndSetConfiguredScriptInfo.prototype.name = 'extractAndSetConfiguredScriptInfo'
+// export const findScriptPath = (function({ originDir, configFileName, ...input }) {
+
+// })
+
+// export const findDefaultConfigPath = (function() {
+
+// })
+
+// 1. find script
+// recurse down from origin repo
+// look at package.json for scriptBuilderDir
+// if dir is not found, keep walking down path towards scriptBuilder recursively
+// if dir is found, get script location
+
+// 2. find config
+// recurse down from origin repo
+// look for config that matches scripts configName
+// if no config is found, keep walking down path towards scriptBuilder recurisvely
+// if config is found, get config location
+
+// scriptAliases: {
+//   alias: {
+//     originScriptName: string
+//     configFilename: string
+//   }
+// }

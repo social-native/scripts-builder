@@ -1,11 +1,11 @@
 import path from "path";
 import { initializeScript, setOriginDir, setArgsObject, setDefaultConfigPath, 
   setUserConfigPath, 
-  calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand 
+  calcConfigPath, getConfigObject, removeOptionsFromArgsObj, setArgsArr, modifyRelativePathsInConfigObject, addFieldsToConfigObject, writeConfigObjectToPath, executeCommand, setSpecifiedOriginDir 
 } from "../../executors";
 import { logEntryAndExit, logStateChange } from "../../middleware";
 import { applyMiddleware } from "../../applyMiddleware";
-import { Executor, GenerateCommand } from "../../types";
+import { Executor, GenerateCommand, Middleware } from "../../types";
 
 const generateJestCommand = (({ tempConfigFilePath, configObj, argsArr, ...input }) => {
   const commandArgs = argsArr.concat(`--config ${tempConfigFilePath}`);
@@ -29,6 +29,8 @@ const executors = [
   calcConfigPath,
   getConfigObject,
   removeOptionsFromArgsObj({ optionNames: ['config', 'c']}),
+  setSpecifiedOriginDir,
+  removeOptionsFromArgsObj({ optionNames: ['@scriptsBuilderOriginDir']}),
   setArgsArr,
   modifyRelativePathsInConfigObject({
     shouldModifyPath: (path: string) => !path.includes("<rootDir>"),
@@ -58,7 +60,7 @@ const executors = [
 const middleware = [
   logStateChange,
   logEntryAndExit,
-]
+] as Middleware[]
 
 const script = applyMiddleware(executors, middleware)
 script()

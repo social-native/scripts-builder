@@ -9,6 +9,11 @@ import spawn from "cross-spawn";
 import fs from "fs";
 import path from "path";
 import { logger, LOG_LEVEL } from "logger";
+import { setArgsObject, setSpecifiedOriginDir, calcScriptsBuilderLocationRelativeToCallee, traverseDirectoriesAndFind, setScriptName, setLastDirToCallProcess, extractAndSetConfiguredScriptInfo } from "./executors";
+import { applyMiddleware } from "./applyMiddleware";
+import { Executor, Middleware } from "./types";
+import { logEntryAndExit, logStateChange } from "./middleware";
+import get from 'lodash.get';
 
 logger(LOG_LEVEL.DEBUG, "Running main binary");
 
@@ -20,10 +25,8 @@ process.on("unhandledRejection", err => {
 });
 
 // Root directory of repo calling this script
-const originDir = process.argv[1].replace(
-  "node_modules/.bin/snpkg-snapi-common",
-  ""
-);
+const originDir = process.argv[1].split('node_modules')[0];
+
 logger(LOG_LEVEL.DEBUG, "Callee origin directory", originDir);
 
 // Script directory where scripts are located
@@ -60,6 +63,34 @@ if (!existingScripts.includes(script)) {
 }
 
 // calculate script location
+const state = applyMiddleware([
+  setArgsObject,
+  setSpecifiedOriginDir,
+  calcScriptsBuilderLocationRelativeToCallee,
+  setScriptName,
+  setLastDirToCallProcess,
+  traverseDirectoriesAndFind({ findFn: (currentDir, state) => { 
+    try {
+      const packageJSON = path.resolve(currentDir, 'package.json');
+      console.log('looking for', packageJSON)
+      if (fs.existsSync(packageJSON)) {
+        const contents = require(packageJSON)
+        const found = get(contents, `scriptsBuilder.${state.scriptName}`)
+        if (found) { return packageJSON }
+      }
+    } catch(err) {
+      logger(LOG_LEVEL.ERROR, '', err)
+    }
+    return undefined
+  }}),
+  extractAndSetConfiguredScriptInfo
+] as Executor[], [
+  logStateChange,
+  logEntryAndExit,
+] as Middleware[])()
+
+console.log('heeeee', state)
+
 const scriptLocation = require.resolve(path.resolve(scriptDir, script));
 logger(LOG_LEVEL.DEBUG, "Script location", scriptLocation);
 
@@ -79,6 +110,18 @@ const result = spawn.sync("node", command, {
   argv0: originDir
 });
 // logger(LOG_LEVEL.DEBUG, "Script result", result);
+
+
+
+
+
+
+
+
+
+
+
+
 
 // process command result
 if (result.signal) {
