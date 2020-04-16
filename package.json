@@ -24,9 +24,10 @@
   "keywords": [
     "node",
     "scripts builder",
-    "create react app"
+    "create react app",
+    "alias"
   ],
-  "author": "",
+  "author": "Ethan Hathaway <erhathaway@gmail.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/social-native/scripts-builder/issues"

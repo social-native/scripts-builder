@@ -66,3 +66,5 @@ typings/
 
 scripts/lint/tsconfigGenerated.json
 
+
+dist
