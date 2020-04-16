@@ -28,7 +28,7 @@
     "alias"
   ],
   "author": "Ethan Hathaway <erhathaway@gmail.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/social-native/scripts-builder/issues"
   },
