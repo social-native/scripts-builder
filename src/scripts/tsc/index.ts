@@ -8,13 +8,10 @@ import {
   removeOptionsFromArgsObject,
   generateConfigPath,
   addAbsPathsToConfigPaths,
-  importConfig
+  importConfig,
 } from "common";
 
-import {
-  logger,
-  LOG_LEVEL,
-} from 'logger'
+import { logger, LOG_LEVEL } from "logger";
 
 import fs from "fs";
 // import stripJsonComments from "strip-json-comments";
@@ -37,13 +34,13 @@ const parsedArgs = getParsedArgs();
 // get user defined config location, if any
 const configLocationFromArgs = extractConfigLocationFromArgs(parsedArgs, [
   "project",
-  "p"
+  "p",
 ]);
 
 // remove user defined config location from the args object
 const cleanedParsedArgs = removeOptionsFromArgsObject(parsedArgs, [
   "project",
-  "p"
+  "p",
 ]);
 
 // create a new args array using the cleaned args object
@@ -66,7 +63,7 @@ const tsconfigValuesWithPaths = [
   "compilerOptions.mapRoot",
   "compilerOptions.sourceRoot",
   "compilerOptions.typeRoots",
-  "exclude"
+  "exclude",
 ];
 
 const shouldModifyPathFn = (path: string) => !path.includes("<rootDir>");

@@ -9,23 +9,31 @@ import spawn from "cross-spawn";
 import fs from "fs";
 import path from "path";
 import { logger, LOG_LEVEL } from "logger";
-import { setArgsObject, setSpecifiedOriginDir, calcScriptsBuilderLocationRelativeToCallee, traverseDirectoriesAndFind, setScriptName, setLastDirToCallProcess, extractAndSetConfiguredScriptInfo } from "./executors";
+import {
+  setArgsObject,
+  setSpecifiedOriginDir,
+  calcScriptsBuilderLocationRelativeToCallee,
+  traverseDirectoriesAndFind,
+  setScriptName,
+  setLastDirToCallProcess,
+  extractAndSetConfiguredScriptInfo,
+} from "./executors";
 import { applyMiddleware } from "./applyMiddleware";
 import { Executor, Middleware } from "./types";
 import { logEntryAndExit, logStateChange } from "./middleware";
-import get from 'lodash.get';
+import get from "lodash.get";
 
 logger(LOG_LEVEL.DEBUG, "Running main binary");
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
-process.on("unhandledRejection", err => {
+process.on("unhandledRejection", (err) => {
   throw err;
 });
 
 // Root directory of repo calling this script
-const originDir = process.argv[1].split('node_modules')[0];
+const originDir = process.argv[1].split("node_modules")[0];
 
 logger(LOG_LEVEL.DEBUG, "Callee origin directory", originDir);
 
@@ -34,7 +42,7 @@ const scriptDir = path.resolve(__dirname, "scripts");
 logger(LOG_LEVEL.DEBUG, "Directory where scripts exist", originDir);
 
 // read list of scripts that exist from ../scripts
-const existingScripts = fs.readdirSync(scriptDir).map(file => {
+const existingScripts = fs.readdirSync(scriptDir).map((file) => {
   const parts = file.split(".");
   if (parts.length > 1) {
     return parts.slice(0, -1).join(".");
@@ -44,7 +52,7 @@ const existingScripts = fs.readdirSync(scriptDir).map(file => {
 logger(LOG_LEVEL.DEBUG, "Existing scripts", existingScripts);
 
 const args = process.argv.slice(2);
-const scriptIndex = args.findIndex(arg => existingScripts.includes(arg));
+const scriptIndex = args.findIndex((arg) => existingScripts.includes(arg));
 const script = scriptIndex === -1 ? args[0] : args[scriptIndex];
 logger(LOG_LEVEL.DEBUG, "Calling with script", script);
 
@@ -55,7 +63,7 @@ if (!existingScripts.includes(script)) {
     "Desired script does not exist in existing scripts ",
     {
       desiredScript: script,
-      existingScripts
+      existingScripts,
     }
   );
 
@@ -63,33 +71,37 @@ if (!existingScripts.includes(script)) {
 }
 
 // calculate script location
-const state = applyMiddleware([
-  setArgsObject,
-  setSpecifiedOriginDir,
-  calcScriptsBuilderLocationRelativeToCallee,
-  setScriptName,
-  setLastDirToCallProcess,
-  traverseDirectoriesAndFind({ findFn: (currentDir, state) => { 
-    try {
-      const packageJSON = path.resolve(currentDir, 'package.json');
-      console.log('looking for', packageJSON)
-      if (fs.existsSync(packageJSON)) {
-        const contents = require(packageJSON)
-        const found = get(contents, `scriptsBuilder.${state.scriptName}`)
-        if (found) { return packageJSON }
-      }
-    } catch(err) {
-      logger(LOG_LEVEL.ERROR, '', err)
-    }
-    return undefined
-  }}),
-  extractAndSetConfiguredScriptInfo
-] as Executor[], [
-  logStateChange,
-  logEntryAndExit,
-] as Middleware[])()
+const state = applyMiddleware(
+  [
+    setArgsObject,
+    setSpecifiedOriginDir,
+    calcScriptsBuilderLocationRelativeToCallee,
+    setScriptName,
+    setLastDirToCallProcess,
+    traverseDirectoriesAndFind({
+      findFn: (currentDir, state) => {
+        try {
+          const packageJSON = path.resolve(currentDir, "package.json");
+          console.log("looking for", packageJSON);
+          if (fs.existsSync(packageJSON)) {
+            const contents = require(packageJSON);
+            const found = get(contents, `scriptsBuilder.${state.scriptName}`);
+            if (found) {
+              return packageJSON;
+            }
+          }
+        } catch (err) {
+          logger(LOG_LEVEL.ERROR, "", err);
+        }
+        return undefined;
+      },
+    }),
+    extractAndSetConfiguredScriptInfo,
+  ] as Executor[],
+  [logStateChange, logEntryAndExit] as Middleware[]
+)();
 
-console.log('heeeee', state)
+console.log("heeeee", state);
 
 const scriptLocation = require.resolve(path.resolve(scriptDir, script));
 logger(LOG_LEVEL.DEBUG, "Script location", scriptLocation);
@@ -107,21 +119,9 @@ logger(LOG_LEVEL.DEBUG, "Running command", command.join(" "));
 // run command
 const result = spawn.sync("node", command, {
   stdio: "inherit",
-  argv0: originDir
+  argv0: originDir,
 });
 // logger(LOG_LEVEL.DEBUG, "Script result", result);
-
-
-
-
-
-
-
-
-
-
-
-
 
 // process command result
 if (result.signal) {

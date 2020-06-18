@@ -4,18 +4,27 @@ const evaluator = (executor: Executor, state: IState) => executor(state);
 
 type Script = () => IState;
 
-export const applyMiddleware = <E extends Executor, M extends Middleware>(executors: E[], middleware?: M[]) => (() => {
-  const compiled = middleware && middleware.reduce((acc, m: M) => {
-    return m(acc)
-  }, evaluator)
+export const applyMiddleware = <E extends Executor, M extends Middleware>(
+  executors: E[],
+  middleware?: M[]
+) =>
+  (() => {
+    const compiled =
+      middleware &&
+      middleware.reduce((acc, m: M) => {
+        return m(acc);
+      }, evaluator);
 
-  return executors.reduce((state, executor: E) => {
-    if (!compiled || !middleware || middleware.length === 0) {
-      return executor(state)
-    }
-    return compiled(executor,state)
-  }, {} as IState)
-}) as Script
+    return executors.reduce(
+      (state, executor: E) => {
+        if (!compiled || !middleware || middleware.length === 0) {
+          return executor(state);
+        }
+        return compiled(executor, state);
+      },
+      {} as IState
+    );
+  }) as Script;
 
 // const ejectScript = (executors: Executor[], middleware?: Middleware[]) => {
 //   const { configObj, defaultConfigPath, originDir }= executors.reduce((acc, e: Executor) => {

@@ -4,11 +4,10 @@ import fs from "fs";
 import get from "lodash.get";
 import set from "lodash.set";
 import stripJsonComments from "strip-json-comments";
-import { LOG_LEVEL, logger } from './logger'
+import { LOG_LEVEL, logger } from "./logger";
 /**
  * Common code shared by `bin.js` and `scripts/`
  */
-
 
 export interface IArgObject {
   [argName: string]: string;
@@ -42,7 +41,7 @@ export const initializeScript = () => {
   // Makes the script crash on unhandled rejections instead of silently
   // ignoring them. In the future, promise rejections that are not handled will
   // terminate the Node.js process with a non-zero exit code.
-  process.on("unhandledRejection", err => {
+  process.on("unhandledRejection", (err) => {
     throw err;
   });
   logger(LOG_LEVEL.DEBUG, "Ran initialize script");
@@ -92,7 +91,7 @@ export const extractConfigLocationFromArgs = (
   argObject: IArgObject,
   configOptionNames: string[]
 ) => {
-  const configOptionsSpecified = configOptionNames.filter(c => argObject[c]);
+  const configOptionsSpecified = configOptionNames.filter((c) => argObject[c]);
   if (configOptionsSpecified.length > 1) {
     const message = `Can't specify multiple config options: ${configOptionNames}. They mean the same thing. Pick one!`;
     logger(LOG_LEVEL.ERROR, message);
@@ -101,7 +100,7 @@ export const extractConfigLocationFromArgs = (
     const configLocationFromArgs = argObject[configOptionsSpecified[0]];
     logger(LOG_LEVEL.DEBUG, "Found specified config location", {
       configKey: configOptionsSpecified,
-      location: configLocationFromArgs
+      location: configLocationFromArgs,
     });
     return configLocationFromArgs;
   }
@@ -115,14 +114,14 @@ export const removeOptionsFromArgsObject = (
   options: string[]
 ) => {
   const newArgObject = { ...argObject };
-  options.forEach(o => {
+  options.forEach((o) => {
     if (newArgObject[o]) {
       delete newArgObject[o];
     }
   });
   logger(LOG_LEVEL.DEBUG, "Removed options from args object", {
     newObj: newArgObject,
-    removed: options
+    removed: options,
   });
 
   return newArgObject;
@@ -191,12 +190,12 @@ export const addAbsPathsToConfigPaths = (
   originPath: string,
   shouldModifyPathFn: (path: string) => boolean = () => true
 ) => {
-  modifiableConfigPaths.forEach(p => {
+  modifiableConfigPaths.forEach((p) => {
     const value = get(configObject, p) as string;
     if (!value) {
       return;
     } else if (Array.isArray(value)) {
-      const newValues = value.map(v =>
+      const newValues = value.map((v) =>
         !shouldModifyPathFn(v) || path.isAbsolute(v)
           ? v
           : path.resolve(originPath, v)
