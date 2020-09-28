@@ -55,7 +55,7 @@
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "prettier": "^1.17.0",
-    "strip-json-comments": "^2.0.1",
+    "strip-json-comments": "^3.1.1",
     "tslint": "^5.16.0",
     "tslint-eslint-rules": "^5.4.0",
     "yargs": "^13.2.4"
