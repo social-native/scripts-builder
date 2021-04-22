@@ -48,7 +48,7 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.1",
     "cross-spawn": "^6.0.5",
     "deep-object-diff": "^1.1.0",
     "depcheck": "^0.7.2",
